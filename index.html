@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Conscientia</title>
 
   <style>
@@ -17,7 +18,6 @@
       color: #f2f2f2;
       font-family: Arial, Helvetica, sans-serif;
       min-height: 100vh;
-      overflow: hidden;
     }
 
     .screen {
@@ -27,7 +27,6 @@
       align-items: center;
       text-align: center;
       padding: 30px;
-      transition: opacity 1.5s ease;
     }
 
     h1 {
@@ -50,7 +49,7 @@
       margin-top: 50px;
       display: inline-block;
       background: none;
-      border: 1px solid rgba(255,255,255,0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       color: #f2f2f2;
       padding: 14px 28px;
       font-size: 0.75rem;
@@ -61,7 +60,7 @@
     }
 
     .enter:hover {
-      border-color: rgba(255,255,255,0.8);
+      border-color: rgba(255, 255, 255, 0.8);
     }
 
     .links {
@@ -70,39 +69,38 @@
       justify-content: center;
       gap: 30px;
       flex-wrap: wrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 1.5s ease;
-    }
-
-    .links.visible {
-      opacity: 1;
-      pointer-events: auto;
     }
 
     .links a {
       color: #f2f2f2;
       text-decoration: none;
       font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
+      letter-spacing: 0.15em;
       opacity: 0.6;
+      transition: opacity 0.3s ease;
     }
 
     .links a:hover {
       opacity: 1;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 0.7rem;
+      opacity: 0.4;
     }
   </style>
 </head>
 
 <body>
 
-  <audio id="introAudio" loop>
-    <source src="intro.mp3" type="audio/mpeg">
+  <audio id="introAudio" preload="auto" loop>
+    <source src="./intro.mp3" type="audio/mpeg">
   </audio>
 
   <main class="screen">
     <div>
+
       <h1>Conscientia</h1>
 
       <p class="coming-soon">
@@ -113,43 +111,56 @@
         Enter
       </button>
 
-      <div class="links" id="links">
-        <a href="https://www.instagram.com/conscientiaband/" target="_blank">
+      <div class="links">
+
+        <a
+          href="https://www.instagram.com/conscientiaband/"
+          target="_blank"
+          rel="noopener noreferrer">
           Instagram
         </a>
 
         <a href="mailto:contact@conscientiaband.com">
-          Contact
+          contact@conscientiaband.com
         </a>
+
       </div>
+
+      <p id="status"></p>
+
     </div>
   </main>
 
   <script>
-    const enterButton = document.getElementById("enterButton");
-    const introAudio = document.getElementById("introAudio");
-    const links = document.getElementById("links");
+    const button = document.getElementById("enterButton");
+    const audio = document.getElementById("introAudio");
+    const status = document.getElementById("status");
 
-    enterButton.addEventListener("click", async () => {
+    button.addEventListener("click", async () => {
       try {
-        introAudio.volume = 0;
-        await introAudio.play();
+        audio.volume = 0;
 
-        // Fade audio in
+        await audio.play();
+
+        button.textContent = "Playing";
+        status.textContent = "";
+
         let volume = 0;
-        const fade = setInterval(() => {
-          if (volume < 0.6) {
-            volume += 0.02;
-            introAudio.volume = Math.min(volume, 0.6);
+
+        const fadeIn = setInterval(() => {
+          volume += 0.02;
+
+          if (volume >= 0.6) {
+            audio.volume = 0.6;
+            clearInterval(fadeIn);
           } else {
-            clearInterval(fade);
+            audio.volume = volume;
           }
         }, 100);
 
-        enterButton.style.display = "none";
-        links.classList.add("visible");
       } catch (error) {
-        console.error("Audio could not start:", error);
+        console.error(error);
+        status.textContent = "Audio could not be loaded.";
       }
     });
   </script>
