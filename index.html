@@ -43,11 +43,10 @@
       letter-spacing: 0.4em;
       text-transform: uppercase;
       opacity: 0.6;
-      
     }
 
     .enter {
-      margin-top: 50px;
+      margin-top: 45px;
       display: inline-block;
       background: none;
       border: 1px solid rgba(255, 255, 255, 0.3);
@@ -64,8 +63,47 @@
       border-color: rgba(255, 255, 255, 0.8);
     }
 
+    .chapters {
+      margin-top: 50px;
+      display: grid;
+      grid-template-columns: repeat(5, 58px);
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .chapters a {
+      width: 58px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid rgba(255, 255, 255, 0.22);
+
+      color: #f2f2f2;
+      text-decoration: none;
+
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+
+      opacity: 0.5;
+
+      transition:
+        opacity 0.3s ease,
+        border-color 0.3s ease,
+        transform 0.3s ease,
+        background 0.3s ease;
+    }
+
+    .chapters a:hover {
+      opacity: 1;
+      border-color: rgba(255, 255, 255, 0.85);
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
     .links {
-      margin-top: 70px;
+      margin-top: 60px;
       display: flex;
       justify-content: center;
       gap: 30px;
@@ -90,13 +128,30 @@
       font-size: 0.7rem;
       opacity: 0.4;
     }
+
+    @media (max-width: 500px) {
+      .chapters {
+        grid-template-columns: repeat(5, 48px);
+        gap: 8px;
+      }
+
+      .chapters a {
+        width: 48px;
+        height: 48px;
+        font-size: 0.72rem;
+      }
+
+      .links {
+        gap: 18px;
+      }
+    }
   </style>
 </head>
 
 <body>
 
   <audio id="introAudio" preload="auto" loop>
-    <source src="./intro.mp3.wav" type="audio/mpeg">
+    <source src="./intro.mp3.wav" type="audio/wav">
   </audio>
 
   <main class="screen">
@@ -111,6 +166,20 @@
       <button class="enter" id="enterButton">
         Enter
       </button>
+
+      <div class="chapters">
+        <a href="chapter1.html">I</a>
+        <a href="chapter2.html">II</a>
+        <a href="chapter3.html">III</a>
+        <a href="chapter4.html">IV</a>
+        <a href="chapter5.html">V</a>
+
+        <a href="chapter6.html">VI</a>
+        <a href="chapter7.html">VII</a>
+        <a href="chapter8.html">VIII</a>
+        <a href="chapter9.html">IX</a>
+        <a href="chapter10.html">X</a>
+      </div>
 
       <div class="links">
 
