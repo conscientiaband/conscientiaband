@@ -29,6 +29,10 @@
       padding: 30px;
     }
 
+    .home {
+      width: min(100%, 980px);
+    }
+
     h1 {
       font-size: clamp(3rem, 10vw, 8rem);
       font-weight: 300;
@@ -59,15 +63,50 @@
       transition: 0.3s ease;
     }
 
-    .enter:hover {
+    .enter:hover,
+    .enter:focus-visible {
       border-color: rgba(255, 255, 255, 0.8);
+      outline: none;
     }
 
-    .sigil-wrap {
-      margin: 42px auto 6px;
-      width: 190px;
-      max-width: 58vw;
-      opacity: 0.92;
+    .album-map {
+      position: relative;
+      width: min(430px, 92vw);
+      aspect-ratio: 1;
+      margin: 46px auto 0;
+    }
+
+    .orbit {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .orbit-segment {
+      fill: none;
+      stroke: rgba(242, 242, 242, 0.07);
+      stroke-width: 1;
+      stroke-linecap: round;
+      transition:
+        stroke 0.9s ease,
+        filter 0.9s ease;
+    }
+
+    .orbit-segment.is-awake {
+      stroke: rgba(242, 242, 242, 0.5);
+      filter: drop-shadow(0 0 4px rgba(242, 242, 242, 0.12));
+    }
+
+    .map-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 45%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
     }
 
     .sigil {
@@ -103,58 +142,79 @@
       filter: drop-shadow(0 0 9px rgba(242, 242, 242, 0.3));
     }
 
-    .journey-status {
-      margin-top: 13px;
-      min-height: 1em;
-      font-size: 0.58rem;
-      letter-spacing: 0.32em;
+    .map-readout {
+      position: absolute;
+      left: 50%;
+      top: 72%;
+      width: 220px;
+      max-width: 58%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .chapter-reveal {
+      min-height: 1.2em;
+      font-size: 0.62rem;
+      letter-spacing: 0.24em;
       text-transform: uppercase;
-      opacity: 0.28;
+      opacity: 0.42;
+      transition: opacity 0.25s ease;
     }
 
-    .chapters {
-      margin-top: 34px;
-      display: grid;
-      grid-template-columns: repeat(5, 58px);
-      gap: 12px;
-      justify-content: center;
+    .journey-status {
+      margin-top: 9px;
+      min-height: 1em;
+      font-size: 0.54rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      opacity: 0.22;
     }
 
-    .chapters a {
-      width: 58px;
-      height: 58px;
+    .chapter-node {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: clamp(42px, 11vw, 52px);
+      height: clamp(42px, 11vw, 52px);
+      transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
       justify-content: center;
 
-      border: 1px solid rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      background: rgba(5, 5, 5, 0.92);
 
       color: #f2f2f2;
       text-decoration: none;
-
-      font-size: 0.8rem;
-      letter-spacing: 0.05em;
-
-      opacity: 0.5;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      opacity: 0.42;
 
       transition:
         opacity 0.3s ease,
         border-color 0.3s ease,
         transform 0.3s ease,
-        background 0.3s ease;
+        background 0.3s ease,
+        box-shadow 0.3s ease;
     }
 
-    .chapters a {
-      position: relative;
+    .chapter-node:hover,
+    .chapter-node:focus-visible {
+      opacity: 1;
+      border-color: rgba(255, 255, 255, 0.78);
+      transform: translate(-50%, -50%) scale(1.08);
+      background: rgba(255, 255, 255, 0.035);
+      outline: none;
     }
 
-    .chapters a.visited {
+    .chapter-node.visited {
       opacity: 0.9;
       border-color: rgba(255, 255, 255, 0.48);
       background: rgba(255, 255, 255, 0.025);
     }
 
-    .chapters a.visited::after {
+    .chapter-node.visited::after {
       content: "";
       position: absolute;
       width: 3px;
@@ -163,18 +223,16 @@
       bottom: 6px;
       transform: translateX(-50%);
       border-radius: 50%;
-      background: rgba(242, 242, 242, 0.68);
+      background: rgba(242, 242, 242, 0.7);
     }
 
-    .chapters a:hover {
-      opacity: 1;
-      border-color: rgba(255, 255, 255, 0.85);
-      transform: translateY(-3px);
-      background: rgba(255, 255, 255, 0.03);
+    .chapter-node[data-chapter="9"].visited {
+      border-color: rgba(244, 237, 218, 0.72);
+      box-shadow: 0 0 16px rgba(244, 237, 218, 0.07);
     }
 
     .links {
-      margin-top: 60px;
+      margin-top: 42px;
       display: flex;
       justify-content: center;
       gap: 30px;
@@ -190,15 +248,18 @@
       transition: opacity 0.3s ease;
     }
 
-    .links a:hover {
-      .contact-note {
-  margin-top: 18px;
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  opacity: 0.35;
-  line-height: 1.6;
-}
+    .links a:hover,
+    .links a:focus-visible {
       opacity: 1;
+      outline: none;
+    }
+
+    .contact-note {
+      margin-top: 18px;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      opacity: 0.35;
+      line-height: 1.6;
     }
 
     #status {
@@ -207,20 +268,51 @@
       opacity: 0.4;
     }
 
-    @media (max-width: 500px) {
-      .chapters {
-        grid-template-columns: repeat(5, 48px);
-        gap: 8px;
+    @media (max-width: 520px) {
+      .screen {
+        padding: 24px 14px 36px;
+        align-items: flex-start;
       }
 
-      .chapters a {
-        width: 48px;
-        height: 48px;
-        font-size: 0.72rem;
+      h1 {
+        margin-top: 34px;
+      }
+
+      .album-map {
+        width: min(360px, 96vw);
+        margin-top: 38px;
+      }
+
+      .map-center {
+        width: 42%;
+      }
+
+      .map-readout {
+        top: 70%;
+        max-width: 52%;
+      }
+
+      .chapter-reveal {
+        font-size: 0.52rem;
+        letter-spacing: 0.18em;
+      }
+
+      .journey-status {
+        font-size: 0.48rem;
       }
 
       .links {
+        margin-top: 32px;
         gap: 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .orbit-segment,
+      .sigil-piece,
+      .sigil-core,
+      .chapter-node {
+        transition: none;
       }
     }
   </style>
@@ -233,7 +325,7 @@
   </audio>
 
   <main class="screen">
-    <div>
+    <div class="home">
 
       <h1>Conscientia</h1>
 
@@ -245,35 +337,53 @@
         Enter
       </button>
 
-      <div class="sigil-wrap" aria-hidden="true">
-        <svg class="sigil" id="journeySigil" viewBox="0 0 200 200">
-          <path class="sigil-piece" data-chapter="1" d="M100 24 A76 76 0 0 1 176 100" />
-          <path class="sigil-piece" data-chapter="2" d="M176 100 A76 76 0 0 1 100 176" />
-          <path class="sigil-piece" data-chapter="3" d="M100 176 A76 76 0 0 1 24 100" />
-          <path class="sigil-piece" data-chapter="4" d="M24 100 A76 76 0 0 1 100 24" />
-          <path class="sigil-piece" data-chapter="5" d="M100 42 L100 100" />
-          <path class="sigil-piece" data-chapter="6" d="M100 100 L100 158" />
-          <path class="sigil-piece" data-chapter="7" d="M100 63 L137 100" />
-          <path class="sigil-piece" data-chapter="8" d="M137 100 L100 137" />
-          <path class="sigil-piece" data-chapter="9" d="M100 137 L63 100" />
-          <path class="sigil-piece" data-chapter="10" d="M63 100 L100 63" />
-          <circle class="sigil-core" cx="100" cy="100" r="3.2" />
+      <div class="album-map" id="albumMap">
+
+        <svg class="orbit" viewBox="0 0 420 420" aria-hidden="true">
+          <path class="orbit-segment" data-chapter="1" d="M210 40 L309.9 72.5" />
+          <path class="orbit-segment" data-chapter="2" d="M309.9 72.5 L371.7 157.5" />
+          <path class="orbit-segment" data-chapter="3" d="M371.7 157.5 L371.7 262.5" />
+          <path class="orbit-segment" data-chapter="4" d="M371.7 262.5 L309.9 347.5" />
+          <path class="orbit-segment" data-chapter="5" d="M309.9 347.5 L210 380" />
+          <path class="orbit-segment" data-chapter="6" d="M210 380 L110.1 347.5" />
+          <path class="orbit-segment" data-chapter="7" d="M110.1 347.5 L48.3 262.5" />
+          <path class="orbit-segment" data-chapter="8" d="M48.3 262.5 L48.3 157.5" />
+          <path class="orbit-segment" data-chapter="9" d="M48.3 157.5 L110.1 72.5" />
+          <path class="orbit-segment" data-chapter="10" d="M110.1 72.5 L210 40" />
         </svg>
-        <p class="journey-status" id="journeyStatus"></p>
-      </div>
 
-      <div class="chapters">
-        <a href="chapter1.html" data-chapter="1">I</a>
-        <a href="chapter2.html" data-chapter="2">II</a>
-        <a href="chapter3.html" data-chapter="3">III</a>
-        <a href="chapter4.html" data-chapter="4">IV</a>
-        <a href="chapter5.html" data-chapter="5">V</a>
+        <div class="map-center" aria-hidden="true">
+          <svg class="sigil" id="journeySigil" viewBox="0 0 200 200">
+            <path class="sigil-piece" data-chapter="1" d="M100 24 A76 76 0 0 1 176 100" />
+            <path class="sigil-piece" data-chapter="2" d="M176 100 A76 76 0 0 1 100 176" />
+            <path class="sigil-piece" data-chapter="3" d="M100 176 A76 76 0 0 1 24 100" />
+            <path class="sigil-piece" data-chapter="4" d="M24 100 A76 76 0 0 1 100 24" />
+            <path class="sigil-piece" data-chapter="5" d="M100 42 L100 100" />
+            <path class="sigil-piece" data-chapter="6" d="M100 100 L100 158" />
+            <path class="sigil-piece" data-chapter="7" d="M100 63 L137 100" />
+            <path class="sigil-piece" data-chapter="8" d="M137 100 L100 137" />
+            <path class="sigil-piece" data-chapter="9" d="M100 137 L63 100" />
+            <path class="sigil-piece" data-chapter="10" d="M63 100 L100 63" />
+            <circle class="sigil-core" cx="100" cy="100" r="3.2" />
+          </svg>
+        </div>
 
-        <a href="chapter6.html" data-chapter="6">VI</a>
-        <a href="chapter7.html" data-chapter="7">VII</a>
-        <a href="chapter8.html" data-chapter="8">VIII</a>
-        <a href="chapter9.html" data-chapter="9">IX</a>
-        <a href="chapter10.html" data-chapter="10">X</a>
+        <div class="map-readout" aria-hidden="true">
+          <p class="chapter-reveal" id="chapterReveal">The Journey</p>
+          <p class="journey-status" id="journeyStatus"></p>
+        </div>
+
+        <a class="chapter-node" href="chapter1.html" data-chapter="1" data-title="Nova Visio" style="--x:50%; --y:9.5%;" aria-label="I — Nova Visio">I</a>
+        <a class="chapter-node" href="chapter2.html" data-chapter="2" data-title="Ignarus Sui" style="--x:73.8%; --y:17.3%;" aria-label="II — Ignarus Sui">II</a>
+        <a class="chapter-node" href="chapter3.html" data-chapter="3" data-title="Inantias" style="--x:88.5%; --y:37.5%;" aria-label="III — Inantias">III</a>
+        <a class="chapter-node" href="chapter4.html" data-chapter="4" data-title="Disciplina" style="--x:88.5%; --y:62.5%;" aria-label="IV — Disciplina">IV</a>
+        <a class="chapter-node" href="chapter5.html" data-chapter="5" data-title="Relaptus" style="--x:73.8%; --y:82.7%;" aria-label="V — Relaptus">V</a>
+        <a class="chapter-node" href="chapter6.html" data-chapter="6" data-title="Umbra" style="--x:50%; --y:90.5%;" aria-label="VI — Umbra">VI</a>
+        <a class="chapter-node" href="chapter7.html" data-chapter="7" data-title="Silentium" style="--x:26.2%; --y:82.7%;" aria-label="VII — Silentium">VII</a>
+        <a class="chapter-node" href="chapter8.html" data-chapter="8" data-title="Conscientia" style="--x:11.5%; --y:62.5%;" aria-label="VIII — Conscientia">VIII</a>
+        <a class="chapter-node" href="chapter9.html" data-chapter="9" data-title="Lux" style="--x:11.5%; --y:37.5%;" aria-label="IX — Lux">IX</a>
+        <a class="chapter-node" href="chapter10.html" data-chapter="10" data-title="Iter Aeternum" style="--x:26.2%; --y:17.3%;" aria-label="X — Iter Aeternum">X</a>
+
       </div>
 
       <div class="links">
@@ -287,15 +397,13 @@
 
         <a href="mailto:contact@conscientiaband.com">
           contact@conscientiaband.com
-
-          
         </a>
 
       </div>
 
       <p class="contact-note">
-  For any inquiries, feel free to reach out via Instagram for a faster response.
-</p>
+        For any inquiries, feel free to reach out via Instagram for a faster response.
+      </p>
 
       <p id="status"></p>
 
@@ -306,9 +414,12 @@
     const button = document.getElementById("enterButton");
     const audio = document.getElementById("introAudio");
     const status = document.getElementById("status");
+
     const sigil = document.getElementById("journeySigil");
     const journeyStatus = document.getElementById("journeyStatus");
-    const chapterLinks = document.querySelectorAll(".chapters a[data-chapter]");
+    const chapterReveal = document.getElementById("chapterReveal");
+    const chapterLinks = document.querySelectorAll(".chapter-node[data-chapter]");
+    const orbitSegments = document.querySelectorAll(".orbit-segment[data-chapter]");
     const journeyKey = "conscientia-journey";
 
     const getJourney = () => {
@@ -327,6 +438,10 @@
         piece.classList.toggle("is-awake", visited.includes(Number(piece.dataset.chapter)));
       });
 
+      orbitSegments.forEach(segment => {
+        segment.classList.toggle("is-awake", visited.includes(Number(segment.dataset.chapter)));
+      });
+
       chapterLinks.forEach(link => {
         link.classList.toggle("visited", visited.includes(Number(link.dataset.chapter)));
       });
@@ -343,10 +458,26 @@
     };
 
     chapterLinks.forEach(link => {
+      const reveal = () => {
+        chapterReveal.textContent = `${link.textContent.trim()} — ${link.dataset.title}`;
+        chapterReveal.style.opacity = "0.78";
+      };
+
+      const conceal = () => {
+        chapterReveal.textContent = "The Journey";
+        chapterReveal.style.opacity = "0.42";
+      };
+
+      link.addEventListener("pointerenter", reveal);
+      link.addEventListener("pointerleave", conceal);
+      link.addEventListener("focus", reveal);
+      link.addEventListener("blur", conceal);
+
       link.addEventListener("click", () => {
         try {
           const chapter = Number(link.dataset.chapter);
           const visited = getJourney();
+
           if (!visited.includes(chapter)) {
             visited.push(chapter);
             visited.sort((a, b) => a - b);
@@ -364,7 +495,6 @@
     button.addEventListener("click", async () => {
       try {
         audio.volume = 0;
-
         await audio.play();
 
         button.textContent = "Playing";
