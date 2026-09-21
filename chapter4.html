@@ -165,5 +165,21 @@
 
   </main>
 
+
+  <script id="conscientia-chapter-4-tracker">
+    try {
+      const key = 'conscientia-journey';
+      const visited = JSON.parse(localStorage.getItem(key) || '[]');
+      const chapter = 4;
+      if (!visited.includes(chapter)) {
+        visited.push(chapter);
+        visited.sort((a, b) => a - b);
+        localStorage.setItem(key, JSON.stringify(visited));
+      }
+    } catch (error) {
+      // The site still works normally if local storage is unavailable.
+    }
+  </script>
+
 </body>
 </html>
