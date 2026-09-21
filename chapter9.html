@@ -39,8 +39,8 @@
       background:
         radial-gradient(
           circle at 50% 46%,
-          rgba(244, 237, 218, calc(0.015 + (var(--lux-pulse) * 0.095))) 0%,
-          rgba(112, 24, 30, calc(var(--lux-impact) * 0.045)) 30%,
+          rgba(244, 237, 218, calc(0.025 + (var(--lux-pulse) * 0.28))) 0%,
+          rgba(112, 24, 30, calc(var(--lux-impact) * 0.16)) 32%,
           rgba(0, 0, 0, 0) 70%
         );
       opacity: 1;
@@ -51,8 +51,8 @@
       position: absolute;
       font-size: clamp(15rem, 45vw, 40rem);
       font-weight: 300;
-      color: rgba(255, 255, 255, calc(0.018 + (var(--lux-pulse) * 0.05)));
-      transform: scale(calc(1 + (var(--lux-impact) * 0.012)));
+      color: rgba(255, 255, 255, calc(0.018 + (var(--lux-pulse) * 0.17)));
+      transform: scale(calc(1 + (var(--lux-impact) * 0.038)));
       transform-origin: center;
       transition: color 0.06s linear, transform 0.06s linear;
       user-select: none;
@@ -64,6 +64,7 @@
       position: relative;
       z-index: 2;
       width: min(850px, 100%);
+      filter: brightness(calc(1 + (var(--lux-pulse) * 0.12)));
       animation: fadeIn 1.8s ease;
     }
 
@@ -100,7 +101,9 @@
       letter-spacing: 0.34em;
       text-transform: uppercase;
       cursor: pointer;
-      box-shadow: 0 0 calc(var(--lux-impact) * 24px) rgba(244, 237, 218, calc(var(--lux-impact) * 0.18));
+      box-shadow:
+        0 0 calc(var(--lux-impact) * 52px) rgba(244, 237, 218, calc(var(--lux-impact) * 0.34)),
+        inset 0 0 calc(var(--lux-impact) * 18px) rgba(112, 24, 30, calc(var(--lux-impact) * 0.12));
       transition: border-color 0.3s ease, background 0.3s ease, opacity 0.3s ease, box-shadow 0.06s linear;
     }
 
@@ -311,8 +314,8 @@
 
       const nyquist = audioContext.sampleRate / 2;
       const binHz = nyquist / frequencyData.length;
-      const startBin = Math.max(1, Math.floor(38 / binHz));
-      const endBin = Math.min(frequencyData.length - 1, Math.ceil(165 / binHz));
+      const startBin = Math.max(1, Math.floor(30 / binHz));
+      const endBin = Math.min(frequencyData.length - 1, Math.ceil(220 / binHz));
 
       let sum = 0;
       let peak = 0;
@@ -324,12 +327,13 @@
       }
 
       const low = sum / Math.max(1, endBin - startBin + 1);
-      const body = Math.max(0, Math.min(1, (low - 32) / 125));
-      const transient = Math.max(0, Math.min(1, (low - previousLow - 3) / 34));
-      const peakKick = Math.max(0, Math.min(1, (peak - 145) / 95));
+      const body = Math.max(0, Math.min(1, (low - 10) / 90));
+      const transient = Math.max(0, Math.min(1, (low - previousLow - 1) / 12));
+      const peakKick = Math.max(0, Math.min(1, (peak - 70) / 100));
 
-      pulse += (body - pulse) * 0.28;
-      impact = Math.max(impact * 0.72, transient * 0.9, peakKick * 0.34);
+      const shapedBody = Math.pow(body, 0.72);
+      pulse += (shapedBody - pulse) * 0.42;
+      impact = Math.max(impact * 0.78, transient, peakKick * 0.72);
       previousLow = low;
 
       document.body.style.setProperty('--lux-pulse', pulse.toFixed(3));
