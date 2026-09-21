@@ -9,6 +9,9 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
+      --lux-pulse: 0;
+      --lux-impact: 0;
+
       min-height: 100vh;
       color: #f2f2f2;
       font-family: Arial, Helvetica, sans-serif;
@@ -24,13 +27,34 @@
       text-align: center;
       padding: 40px;
       overflow: hidden;
+      isolation: isolate;
+    }
+
+    .screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          circle at 50% 46%,
+          rgba(244, 237, 218, calc(0.015 + (var(--lux-pulse) * 0.095))) 0%,
+          rgba(112, 24, 30, calc(var(--lux-impact) * 0.045)) 30%,
+          rgba(0, 0, 0, 0) 70%
+        );
+      opacity: 1;
+      transition: opacity 0.15s linear;
     }
 
     .background-number {
       position: absolute;
       font-size: clamp(15rem, 45vw, 40rem);
       font-weight: 300;
-      color: rgba(255, 255, 255, 0.018);
+      color: rgba(255, 255, 255, calc(0.018 + (var(--lux-pulse) * 0.05)));
+      transform: scale(calc(1 + (var(--lux-impact) * 0.012)));
+      transform-origin: center;
+      transition: color 0.06s linear, transform 0.06s linear;
       user-select: none;
       pointer-events: none;
       line-height: 1;
@@ -76,7 +100,8 @@
       letter-spacing: 0.34em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: border-color 0.3s ease, background 0.3s ease, opacity 0.3s ease;
+      box-shadow: 0 0 calc(var(--lux-impact) * 24px) rgba(244, 237, 218, calc(var(--lux-impact) * 0.18));
+      transition: border-color 0.3s ease, background 0.3s ease, opacity 0.3s ease, box-shadow 0.06s linear;
     }
 
     .demo-button:hover,
@@ -175,6 +200,18 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .screen::before,
+      .background-number,
+      .demo-button {
+        transition: none;
+      }
+
+      .background-number {
+        transform: none !important;
+      }
+    }
   </style>
 </head>
 
@@ -222,6 +259,91 @@
     const progressFill = document.getElementById('progressFill');
     const time = document.getElementById('time');
 
+    let audioContext;
+    let analyser;
+    let sourceNode;
+    let frequencyData;
+    let visualFrame;
+    let previousLow = 0;
+    let pulse = 0;
+    let impact = 0;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const initAudioReactive = async () => {
+      if (reducedMotion) return;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.58;
+        frequencyData = new Uint8Array(analyser.frequencyBinCount);
+
+        sourceNode = audioContext.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+      }
+
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+    };
+
+    const renderAudioReactive = () => {
+      if (!analyser || audio.paused || audio.ended) {
+        pulse *= 0.84;
+        impact *= 0.72;
+
+        document.body.style.setProperty('--lux-pulse', pulse.toFixed(3));
+        document.body.style.setProperty('--lux-impact', impact.toFixed(3));
+
+        if (pulse > 0.01 || impact > 0.01) {
+          visualFrame = requestAnimationFrame(renderAudioReactive);
+        }
+        return;
+      }
+
+      analyser.getByteFrequencyData(frequencyData);
+
+      const nyquist = audioContext.sampleRate / 2;
+      const binHz = nyquist / frequencyData.length;
+      const startBin = Math.max(1, Math.floor(38 / binHz));
+      const endBin = Math.min(frequencyData.length - 1, Math.ceil(165 / binHz));
+
+      let sum = 0;
+      let peak = 0;
+
+      for (let i = startBin; i <= endBin; i += 1) {
+        const value = frequencyData[i];
+        sum += value;
+        if (value > peak) peak = value;
+      }
+
+      const low = sum / Math.max(1, endBin - startBin + 1);
+      const body = Math.max(0, Math.min(1, (low - 32) / 125));
+      const transient = Math.max(0, Math.min(1, (low - previousLow - 3) / 34));
+      const peakKick = Math.max(0, Math.min(1, (peak - 145) / 95));
+
+      pulse += (body - pulse) * 0.28;
+      impact = Math.max(impact * 0.72, transient * 0.9, peakKick * 0.34);
+      previousLow = low;
+
+      document.body.style.setProperty('--lux-pulse', pulse.toFixed(3));
+      document.body.style.setProperty('--lux-impact', impact.toFixed(3));
+
+      visualFrame = requestAnimationFrame(renderAudioReactive);
+    };
+
+    const startAudioReactive = () => {
+      if (reducedMotion || !analyser) return;
+      cancelAnimationFrame(visualFrame);
+      visualFrame = requestAnimationFrame(renderAudioReactive);
+    };
+
     const formatTime = seconds => {
       if (!Number.isFinite(seconds)) return '0:00';
       const minutes = Math.floor(seconds / 60);
@@ -239,14 +361,17 @@
     button.addEventListener('click', async () => {
       if (audio.paused) {
         try {
+          await initAudioReactive();
           await audio.play();
           setPlayingState(true);
+          startAudioReactive();
         } catch (error) {
           label.textContent = 'Demo unavailable';
         }
       } else {
         audio.pause();
         setPlayingState(false);
+        startAudioReactive();
       }
     });
 
@@ -260,6 +385,8 @@
     audio.addEventListener('ended', () => {
       setPlayingState(false);
       audio.currentTime = 0;
+      previousLow = 0;
+      startAudioReactive();
     });
 
     const seek = event => {
