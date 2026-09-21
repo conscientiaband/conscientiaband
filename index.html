@@ -63,8 +63,57 @@
       border-color: rgba(255, 255, 255, 0.8);
     }
 
+    .sigil-wrap {
+      margin: 42px auto 6px;
+      width: 190px;
+      max-width: 58vw;
+      opacity: 0.92;
+    }
+
+    .sigil {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    .sigil-piece {
+      fill: none;
+      stroke: rgba(242, 242, 242, 0.075);
+      stroke-width: 1.15;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition:
+        stroke 0.9s ease,
+        filter 0.9s ease;
+    }
+
+    .sigil-piece.is-awake {
+      stroke: rgba(242, 242, 242, 0.62);
+      filter: drop-shadow(0 0 4px rgba(242, 242, 242, 0.14));
+    }
+
+    .sigil-core {
+      fill: rgba(242, 242, 242, 0);
+      transition: fill 1.2s ease, filter 1.2s ease;
+    }
+
+    .sigil.is-complete .sigil-core {
+      fill: rgba(242, 242, 242, 0.9);
+      filter: drop-shadow(0 0 9px rgba(242, 242, 242, 0.3));
+    }
+
+    .journey-status {
+      margin-top: 13px;
+      min-height: 1em;
+      font-size: 0.58rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      opacity: 0.28;
+    }
+
     .chapters {
-      margin-top: 50px;
+      margin-top: 34px;
       display: grid;
       grid-template-columns: repeat(5, 58px);
       gap: 12px;
@@ -93,6 +142,28 @@
         border-color 0.3s ease,
         transform 0.3s ease,
         background 0.3s ease;
+    }
+
+    .chapters a {
+      position: relative;
+    }
+
+    .chapters a.visited {
+      opacity: 0.9;
+      border-color: rgba(255, 255, 255, 0.48);
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .chapters a.visited::after {
+      content: "";
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      left: 50%;
+      bottom: 6px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: rgba(242, 242, 242, 0.68);
     }
 
     .chapters a:hover {
@@ -174,18 +245,35 @@
         Enter
       </button>
 
-      <div class="chapters">
-        <a href="chapter1.html">I</a>
-        <a href="chapter2.html">II</a>
-        <a href="chapter3.html">III</a>
-        <a href="chapter4.html">IV</a>
-        <a href="chapter5.html">V</a>
+      <div class="sigil-wrap" aria-hidden="true">
+        <svg class="sigil" id="journeySigil" viewBox="0 0 200 200">
+          <path class="sigil-piece" data-chapter="1" d="M100 24 A76 76 0 0 1 176 100" />
+          <path class="sigil-piece" data-chapter="2" d="M176 100 A76 76 0 0 1 100 176" />
+          <path class="sigil-piece" data-chapter="3" d="M100 176 A76 76 0 0 1 24 100" />
+          <path class="sigil-piece" data-chapter="4" d="M24 100 A76 76 0 0 1 100 24" />
+          <path class="sigil-piece" data-chapter="5" d="M100 42 L100 100" />
+          <path class="sigil-piece" data-chapter="6" d="M100 100 L100 158" />
+          <path class="sigil-piece" data-chapter="7" d="M100 63 L137 100" />
+          <path class="sigil-piece" data-chapter="8" d="M137 100 L100 137" />
+          <path class="sigil-piece" data-chapter="9" d="M100 137 L63 100" />
+          <path class="sigil-piece" data-chapter="10" d="M63 100 L100 63" />
+          <circle class="sigil-core" cx="100" cy="100" r="3.2" />
+        </svg>
+        <p class="journey-status" id="journeyStatus"></p>
+      </div>
 
-        <a href="chapter6.html">VI</a>
-        <a href="chapter7.html">VII</a>
-        <a href="chapter8.html">VIII</a>
-        <a href="chapter9.html">IX</a>
-        <a href="chapter10.html">X</a>
+      <div class="chapters">
+        <a href="chapter1.html" data-chapter="1">I</a>
+        <a href="chapter2.html" data-chapter="2">II</a>
+        <a href="chapter3.html" data-chapter="3">III</a>
+        <a href="chapter4.html" data-chapter="4">IV</a>
+        <a href="chapter5.html" data-chapter="5">V</a>
+
+        <a href="chapter6.html" data-chapter="6">VI</a>
+        <a href="chapter7.html" data-chapter="7">VII</a>
+        <a href="chapter8.html" data-chapter="8">VIII</a>
+        <a href="chapter9.html" data-chapter="9">IX</a>
+        <a href="chapter10.html" data-chapter="10">X</a>
       </div>
 
       <div class="links">
@@ -218,6 +306,60 @@
     const button = document.getElementById("enterButton");
     const audio = document.getElementById("introAudio");
     const status = document.getElementById("status");
+    const sigil = document.getElementById("journeySigil");
+    const journeyStatus = document.getElementById("journeyStatus");
+    const chapterLinks = document.querySelectorAll(".chapters a[data-chapter]");
+    const journeyKey = "conscientia-journey";
+
+    const getJourney = () => {
+      try {
+        return JSON.parse(localStorage.getItem(journeyKey) || "[]")
+          .filter(value => Number.isInteger(value) && value >= 1 && value <= 10);
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const renderJourney = () => {
+      const visited = getJourney();
+
+      document.querySelectorAll(".sigil-piece").forEach(piece => {
+        piece.classList.toggle("is-awake", visited.includes(Number(piece.dataset.chapter)));
+      });
+
+      chapterLinks.forEach(link => {
+        link.classList.toggle("visited", visited.includes(Number(link.dataset.chapter)));
+      });
+
+      sigil.classList.toggle("is-complete", visited.length === 10);
+
+      if (visited.length === 0) {
+        journeyStatus.textContent = "";
+      } else if (visited.length < 10) {
+        journeyStatus.textContent = `${visited.length} / 10`;
+      } else {
+        journeyStatus.textContent = "The cycle is complete";
+      }
+    };
+
+    chapterLinks.forEach(link => {
+      link.addEventListener("click", () => {
+        try {
+          const chapter = Number(link.dataset.chapter);
+          const visited = getJourney();
+          if (!visited.includes(chapter)) {
+            visited.push(chapter);
+            visited.sort((a, b) => a - b);
+            localStorage.setItem(journeyKey, JSON.stringify(visited));
+          }
+        } catch (error) {
+          // Navigation still works if local storage is unavailable.
+        }
+      });
+    });
+
+    renderJourney();
+    window.addEventListener("pageshow", renderJourney);
 
     button.addEventListener("click", async () => {
       try {
