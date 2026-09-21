@@ -407,5 +407,21 @@
       if (event.key === 'ArrowLeft') audio.currentTime = Math.max(0, audio.currentTime - 5);
     });
   </script>
+
+  <script id="conscientia-chapter-9-tracker">
+    try {
+      const key = 'conscientia-journey';
+      const visited = JSON.parse(localStorage.getItem(key) || '[]');
+      const chapter = 9;
+      if (!visited.includes(chapter)) {
+        visited.push(chapter);
+        visited.sort((a, b) => a - b);
+        localStorage.setItem(key, JSON.stringify(visited));
+      }
+    } catch (error) {
+      // The site still works normally if local storage is unavailable.
+    }
+  </script>
+
 </body>
 </html>
