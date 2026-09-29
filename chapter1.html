@@ -97,7 +97,7 @@
       opacity: 0.85;
     }
 
-    .demo-player {
+    .demo-player { 
       width: min(420px, 100%);
       margin: 48px auto 0;
     }
@@ -229,6 +229,10 @@
         transform: none !important;
       }
     }
+    .visual-options { display: flex; justify-content: center; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+    .visual-option { border: 1px solid #ffffff18; color: #aaa; background: transparent; padding: 8px 12px; cursor: pointer; font: inherit; font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; }
+    .visual-option[aria-pressed="true"] { border-color: #b4aaa1; color: #eee; }
+    .visual-option:focus-visible { outline: 2px solid #b4aaa1; outline-offset: 3px; }
   </style>
 </head>
 
@@ -265,6 +269,11 @@
         </div>
       </div>
 
+      <div class="visual-options" role="group" aria-label="Visual style">
+        <button class="visual-option" type="button" data-visual="tear" aria-pressed="true">I · Rupture</button>
+        <button class="visual-option" type="button" data-visual="collapse" aria-pressed="false">II · Collapse</button>
+        <button class="visual-option" type="button" data-visual="distort" aria-pressed="false">III · Distortion</button>
+      </div>
       <a class="back" href="index.html">← Return</a>
     </div>
 
@@ -295,6 +304,13 @@
     let riftSeed = 4127;
     let riftPaths = [];
     let debris = [];
+    let visualStyle = 'tear';
+    document.querySelectorAll('[data-visual]').forEach(option => {
+      option.addEventListener('click', () => {
+        visualStyle = option.dataset.visual;
+        document.querySelectorAll('[data-visual]').forEach(item => item.setAttribute('aria-pressed', String(item === option)));
+      });
+    });
 
     const random = () => {
       riftSeed = (riftSeed * 16807) % 2147483647;
@@ -363,74 +379,143 @@
     };
 
     const drawRift = (energy, hit) => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      riftContext.clearRect(0, 0, width, height);
-      if (audio.currentTime < 1) return;
-      if (energy < 0.008 && hit < 0.008) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const t = audio.currentTime;
+      const ctx = riftContext;
+      ctx.clearRect(0, 0, w, h);
+      if (t < 1) return;
+      const dropped = t >= 14;
+      const age = Math.max(0, t - 14);
+      const onset = 1 - Math.exp(-age * 9);
+      const beat = Math.min(1, hit);
+      const shake = dropped ? Math.sin(t * 91) * (dropBurst * 7 + beat * 1.5) : 0;
+      ctx.save();
+      ctx.translate(shake, 0);
 
-      const afterDrop = audio.currentTime >= 14;
-      const preDropReveal = Math.min(0.42, 0.1 + (audio.currentTime - 1) / 48);
-      const reveal = afterDrop ? 1 : preDropReveal + hit * 0.08;
-      const glow = afterDrop ? 0.35 + energy * 0.13 : 0.14;
-      const age = Math.max(0, audio.currentTime - 14);
-
-      riftContext.lineCap = 'round';
-      riftContext.lineJoin = 'round';
-      riftPaths.forEach((path, pathIndex) => {
-        const visiblePoints = Math.max(2, Math.ceil(path.length * reveal));
-        riftContext.beginPath();
-        riftContext.moveTo(path[0].x, path[0].y);
-        for (let point = 1; point < visiblePoints; point += 1) {
-          const source = path[point];
-          riftContext.lineTo(source.x, source.y);
+      // A textured surface with a torn edge, rather than glowing spokes.
+      if (visualStyle === 'tear') {
+        const gap = dropped ? (w * .2 + beat * w * .065) * onset : 1 + energy * 2;
+        const center = w * .48;
+        const points = [];
+        for (let i = 0; i <= 48; i += 1) {
+          const y = h * i / 48;
+          const rough = Math.sin(i * 8.71) * 13 + Math.sin(i * 2.31) * 20;
+          points.push({x: center + rough + Math.sin(y * .008 + t * .6) * (dropped ? 10 : 1), y});
         }
-
-        riftContext.shadowColor = '#000';
-        riftContext.shadowBlur = afterDrop ? 7 : 2;
-        riftContext.strokeStyle = 'rgba(0,0,0,0.95)';
-        riftContext.lineWidth = afterDrop ? 2.5 + (pathIndex % 4) * 0.8 + dropBurst * 5 : 1;
-        riftContext.stroke();
-        riftContext.shadowBlur = 0;
-        riftContext.save();
-        riftContext.translate(1.2, -0.8);
-        riftContext.strokeStyle = `rgba(190, 183, 168, ${glow})`;
-        riftContext.lineWidth = 0.55 + (pathIndex % 3) * 0.22;
-        riftContext.stroke();
-        riftContext.restore();
-      });
-
-      if (afterDrop && age < 2.4) {
-        const centerX = width * 0.5;
-        const centerY = height * 0.49;
-        const expansion = (1 - dropBurst) * Math.max(width, height) * 0.28;
-
-        for (const shard of debris) {
-          const angle = shard.angle + age * shard.spin;
-          const size = shard.size;
-          const x = shard.x + shard.vx * age;
-          const y = shard.y + shard.vy * age + 240 * age * age;
-          riftContext.beginPath();
-          riftContext.moveTo(x, y);
-          riftContext.lineTo(x + Math.cos(angle + 1.8) * size, y + Math.sin(angle + 1.8) * size);
-          riftContext.lineTo(x + Math.cos(angle - 1.5) * size * 0.55, y + Math.sin(angle - 1.5) * size * 0.55);
-          riftContext.closePath();
-          riftContext.fillStyle = `rgba(75, 72, 66, ${Math.max(0, 1 - age / 2.4) * 0.8})`;
-          riftContext.fill();
-          riftContext.strokeStyle = `rgba(209, 197, 171, ${Math.max(0, 1 - age / 2.4) * 0.4})`;
-          riftContext.lineWidth = 0.6;
-          riftContext.stroke();
+        for (const side of [-1, 1]) {
+          const edge = points.map(p => ({x:p.x + side * gap, y:p.y}));
+          ctx.beginPath();
+          ctx.moveTo(side < 0 ? -30 : w + 30, -30);
+          edge.forEach(p => ctx.lineTo(p.x, p.y));
+          ctx.lineTo(side < 0 ? -30 : w + 30, h + 30);
+          ctx.closePath();
+          const surface = ctx.createLinearGradient(center + side * gap, 0, side < 0 ? 0 : w, 0);
+          surface.addColorStop(0, '#302c28');
+          surface.addColorStop(.08, '#171615');
+          surface.addColorStop(1, '#060606');
+          ctx.fillStyle = surface;
+          ctx.shadowColor = '#000';
+          ctx.shadowBlur = 28;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          edge.forEach((p,i) => i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y));
+          ctx.strokeStyle = 'rgba(197,184,160,.48)';
+          ctx.lineWidth = 1.1;
+          ctx.stroke();
+          // Fibres break and stretch along the ragged opening.
+          for (let i = 3; i < edge.length - 2; i += 3) {
+            const p = edge[i];
+            ctx.beginPath();
+            ctx.moveTo(p.x,p.y);
+            ctx.lineTo(p.x - side * (4 + 22 * Math.abs(Math.sin(i * 4.7 + t))),p.y + Math.sin(i * 7) * 12);
+            ctx.strokeStyle = 'rgba(176,162,137,.25)';
+            ctx.lineWidth = .6;
+            ctx.stroke();
+          }
         }
       }
 
-      const core = riftContext.createRadialGradient(width * 0.5, height * 0.49, 0, width * 0.5, height * 0.49, 70 + hit * 80);
-      core.addColorStop(0, `rgba(205, 191, 166, ${dropBurst * 0.1})`);
-      core.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      riftContext.fillStyle = core;
-      riftContext.fillRect(0, 0, width, height);
-      riftContext.shadowBlur = 0;
-    };
+      if (visualStyle === 'collapse') {
+        const cols = 9;
+        const rows = 6;
+        const cw = w / cols;
+        const ch = h / rows;
+        for (let row = 0; row < rows; row += 1) {
+          for (let col = 0; col < cols; col += 1) {
+            const n = row * cols + col;
+            const seed = Math.abs(Math.sin(n * 78.23 + 4));
+            const delay = seed * .7;
+            // Falling slabs return as a continuous cascade after the first impact.
+            const fallAge = dropped ? (age < 3.2 ? Math.max(0, age - delay) : (age + seed * 2.4) % 3.2) : 0;
+            const x = col * cw + (dropped ? Math.sin(n * 6.1) * fallAge * 45 : 0);
+            const y = row * ch + fallAge * fallAge * 240;
+            ctx.save();
+            ctx.translate(x + cw / 2,y + ch / 2);
+            ctx.rotate(dropped ? Math.sin(n * 5) * fallAge * .6 : 0);
+            ctx.beginPath();
+            ctx.moveTo(-cw/2,-ch/2);
+            ctx.lineTo(cw/2,-ch/2 + ch * .17 * seed);
+            ctx.lineTo(cw/2 - cw * .1 * seed,ch/2);
+            ctx.lineTo(-cw/2,ch/2 - ch * .16 * seed);
+            ctx.closePath();
+            const shade = 12 + Math.floor(seed * 22 + energy * 12);
+            ctx.fillStyle = `rgb(${shade},${shade-2},${shade-4})`;
+            ctx.shadowColor = '#000';
+            ctx.shadowBlur = dropped ? 15 : 0;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = dropped ? 'rgba(161,147,122,.35)' : 'rgba(90,84,74,.12)';
+            ctx.lineWidth = .8;
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
 
+      if (visualStyle === 'distort') {
+        const rows = 32;
+        for (let i = 0; i < rows; i += 1) {
+          const y = h * i / rows;
+          const displacement = dropped ? Math.sin(i * 6.3 + t * 3) * (20 + beat * 150 + dropBurst * 100) : Math.sin(t + i) * energy * 2;
+          const shade = 10 + Math.floor((Math.sin(i * .71) + 1) * 8);
+          ctx.fillStyle = `rgb(${shade},${shade-1},${shade-2})`;
+          ctx.fillRect(displacement,y,w,h/rows-1);
+          ctx.fillStyle = `rgba(174,161,139,${dropped ? .04 + beat * .09 : .015})`;
+          ctx.fillRect(w * .47 + displacement,y,w * .04,h/rows-2);
+          if (dropped && Math.sin(i * 3 + t * 8) > .65) {
+            ctx.fillStyle = 'rgba(188,177,155,.14)';
+            ctx.fillRect(displacement,y,w,1);
+          }
+        }
+      }
+
+      // Material particles keep moving after the chorus impact.
+      if (dropped) {
+        for (let i = 0; i < debris.length; i += 1) {
+          const shard = debris[i];
+          const a = age < 2.4 ? age : (age + i * .137) % 2.4;
+          const x = shard.x + shard.vx * a;
+          const y = shard.y + shard.vy * a + 210 * a * a;
+          ctx.save();
+          ctx.translate(x,y);
+          ctx.rotate(shard.angle + a * shard.spin);
+          ctx.beginPath();
+          ctx.moveTo(0,-shard.size);
+          ctx.lineTo(shard.size * .55,shard.size * .7);
+          ctx.lineTo(-shard.size * .6,shard.size * .25);
+          ctx.closePath();
+          ctx.fillStyle = `rgba(90,81,67,${(1-a/2.4)*.7})`;
+          ctx.fill();
+          ctx.strokeStyle = `rgba(211,195,166,${(1-a/2.4)*.35})`;
+          ctx.lineWidth = .7;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+    };
     resizeRift();
     buildRift();
     window.addEventListener('resize', () => {
