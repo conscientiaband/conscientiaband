@@ -3,170 +3,442 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>I — Conscientia</title>
+  <title>I — Nova Visio</title>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
+      --lux-pulse: 0;
+      --lux-impact: 0;
+      --veil-open: 0;
+
       min-height: 100vh;
       color: #f2f2f2;
       font-family: Arial, Helvetica, sans-serif;
-
-      background:
-        radial-gradient(
-          circle at center,
-          #151515 0%,
-          #090909 45%,
-          #030303 100%
-        );
+      background: radial-gradient(circle at center, #151515 0%, #090909 45%, #030303 100%);
     }
 
     .screen {
       position: relative;
       min-height: 100vh;
-
       display: flex;
       justify-content: center;
       align-items: center;
-
       text-align: center;
       padding: 40px;
-
       overflow: hidden;
+      isolation: isolate;
     }
 
-    /* Large subtle Roman numeral in background */
+    .screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          circle at 50% 46%,
+          rgba(244, 237, 218, calc(0.025 + (var(--lux-pulse) * 0.28))) 0%,
+          rgba(112, 24, 30, calc(var(--lux-impact) * 0.16)) 32%,
+          rgba(0, 0, 0, 0) 70%
+        );
+      opacity: 1;
+      transition: opacity 0.15s linear;
+    }
+
+    .veil {
+      position: absolute;
+      inset: -8%;
+      z-index: 4;
+      pointer-events: none;
+      background: linear-gradient(90deg, #010203, #090b0c 74%, rgba(31, 40, 40, 0.96));
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+      transition: transform 0.1s ease-out;
+    }
+
+    .veil-left {
+      clip-path: polygon(0 0, 100% 0, 55% 49%, 100% 100%, 0 100%);
+      transform: translateX(calc(var(--veil-open) * -57%));
+    }
+
+    .veil-right {
+      background: linear-gradient(270deg, #010203, #090b0c 74%, rgba(31, 40, 40, 0.96));
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 45% 51%);
+      transform: translateX(calc(var(--veil-open) * 57%));
+    }
 
     .background-number {
       position: absolute;
-
       font-size: clamp(15rem, 45vw, 40rem);
       font-weight: 300;
-
-      color: rgba(255, 255, 255, 0.018);
-
+      color: rgba(255, 255, 255, calc(0.018 + (var(--lux-pulse) * 0.17)));
+      transform: scale(calc(1 + (var(--lux-impact) * 0.038)));
+      transform-origin: center;
+      transition: color 0.06s linear, transform 0.06s linear;
       user-select: none;
       pointer-events: none;
-
       line-height: 1;
     }
 
     .content {
       position: relative;
       z-index: 2;
-
-      max-width: 850px;
-
+      width: min(850px, 100%);
+      filter: brightness(calc(1 + (var(--lux-pulse) * 0.12)));
       animation: fadeIn 1.8s ease;
     }
 
     .chapter-number {
       font-size: 0.85rem;
       letter-spacing: 0.5em;
-
       opacity: 0.4;
-
       margin-bottom: 50px;
     }
 
     .text {
       font-size: clamp(1.1rem, 2vw, 1.5rem);
-
       font-weight: 300;
       line-height: 1.8;
-
       letter-spacing: 0.03em;
-
       opacity: 0.85;
+    }
+
+    .demo-player {
+      width: min(420px, 100%);
+      margin: 48px auto 0;
+    }
+
+    .demo-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid rgba(242, 242, 242, 0.3);
+      background: rgba(255, 255, 255, 0.015);
+      color: #f2f2f2;
+      padding: 13px 22px;
+      font: inherit;
+      font-size: 0.68rem;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow:
+        0 0 calc(var(--lux-impact) * 52px) rgba(244, 237, 218, calc(var(--lux-impact) * 0.34)),
+        inset 0 0 calc(var(--lux-impact) * 18px) rgba(112, 24, 30, calc(var(--lux-impact) * 0.12));
+      transition: border-color 0.3s ease, background 0.3s ease, opacity 0.3s ease, box-shadow 0.06s linear;
+    }
+
+    .demo-button:hover,
+    .demo-button:focus-visible {
+      border-color: rgba(242, 242, 242, 0.75);
+      background: rgba(255, 255, 255, 0.045);
+      outline: none;
+    }
+
+    .demo-icon {
+      width: 10px;
+      height: 12px;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .demo-icon::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-left: 9px solid currentColor;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      transition: 0.2s ease;
+    }
+
+    .demo-button.is-playing .demo-icon::before {
+      width: 8px;
+      height: 12px;
+      border: 0;
+      border-left: 3px solid currentColor;
+      border-right: 3px solid currentColor;
+    }
+
+    .progress-shell {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+    }
+
+    .demo-player.is-active .progress-shell {
+      opacity: 0.45;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .progress {
+      flex: 1;
+      height: 1px;
+      background: rgba(242, 242, 242, 0.2);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #f2f2f2;
+    }
+
+    .time {
+      min-width: 32px;
+      text-align: right;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
     }
 
     .author {
       margin-top: 35px;
-
       font-size: 0.75rem;
       letter-spacing: 0.25em;
       text-transform: uppercase;
-
       opacity: 0.35;
     }
 
     .back {
       display: inline-block;
-
-      margin-top: 70px;
-
+      margin-top: 55px;
       color: #f2f2f2;
       text-decoration: none;
-
       font-size: 0.7rem;
       letter-spacing: 0.3em;
       text-transform: uppercase;
-
       opacity: 0.35;
-
-      transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .back:hover {
-      opacity: 1;
-      transform: translateX(-3px);
-    }
+    .back:hover { opacity: 1; transform: translateX(-3px); }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .screen::before,
+      .background-number,
+      .demo-button {
+        transition: none;
+      }
+
+      .background-number {
+        transform: none !important;
+      }
+    }
   </style>
 </head>
 
 <body>
-
   <main class="screen">
-
-    <div class="background-number">
-      I
-    </div>
+    <div class="background-number">I</div>
 
     <div class="content">
-
-      <div class="chapter-number">
-        I
-      </div>
+      <div class="chapter-number">I</div>
 
       <div class="text">
-       One man, a joruney.
-        With truths that cannot be defined within this "state".
-        Yet, he is lost in this vision, and,
-        the vision that opened his eyes becomes the very thing that blinds him.
+        One man, a journey.<br>
+        With truths that cannot be defined within this “state”.<br>
+        Yet he is lost in this vision, and the vision that opened his eyes becomes the very thing that blinds him.<br>
         One man has fallen victim to his own ego.
       </div>
 
-      <a class="back" href="index.html">
-        ← Return
-      </a>
+      <div class="demo-player" id="demoPlayer">
+        <audio id="luxDemo" preload="metadata">
+          <source src="nova-visio-teaser.wav" type="audio/wav">
+        </audio>
 
+        <button class="demo-button" id="demoButton" type="button" aria-label="Play Nova Visio teaser">
+          <span class="demo-icon" aria-hidden="true"></span>
+          <span id="demoLabel">Tear the veil</span>
+        </button>
+
+        <div class="progress-shell">
+          <div class="progress" id="progress" role="slider" aria-label="Demo progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="time" id="time">0:00</span>
+        </div>
+      </div>
+
+      <a class="back" href="index.html">← Return</a>
     </div>
 
+    <div class="veil veil-left" aria-hidden="true"></div>
+    <div class="veil veil-right" aria-hidden="true"></div>
   </main>
 
+  <script>
+    const audio = document.getElementById('luxDemo');
+    const player = document.getElementById('demoPlayer');
+    const button = document.getElementById('demoButton');
+    const label = document.getElementById('demoLabel');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const time = document.getElementById('time');
 
-  <script id="conscientia-chapter-1-tracker">
+    let audioContext;
+    let analyser;
+    let sourceNode;
+    let frequencyData;
+    let visualFrame;
+    let previousLow = 0;
+    let pulse = 0;
+    let impact = 0;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const initAudioReactive = async () => {
+      if (reducedMotion) return;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.58;
+        frequencyData = new Uint8Array(analyser.frequencyBinCount);
+
+        sourceNode = audioContext.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+      }
+
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+    };
+
+    const renderAudioReactive = () => {
+      if (!analyser || audio.paused || audio.ended) {
+        pulse *= 0.84;
+        impact *= 0.72;
+
+        document.body.style.setProperty('--lux-pulse', pulse.toFixed(3));
+        document.body.style.setProperty('--lux-impact', impact.toFixed(3));
+        document.body.style.setProperty('--veil-open', '0');
+
+        if (pulse > 0.01 || impact > 0.01) {
+          visualFrame = requestAnimationFrame(renderAudioReactive);
+        }
+        return;
+      }
+
+      analyser.getByteFrequencyData(frequencyData);
+
+      const nyquist = audioContext.sampleRate / 2;
+      const binHz = nyquist / frequencyData.length;
+      const startBin = Math.max(1, Math.floor(30 / binHz));
+      const endBin = Math.min(frequencyData.length - 1, Math.ceil(220 / binHz));
+
+      let sum = 0;
+      let peak = 0;
+
+      for (let i = startBin; i <= endBin; i += 1) {
+        const value = frequencyData[i];
+        sum += value;
+        if (value > peak) peak = value;
+      }
+
+      const low = sum / Math.max(1, endBin - startBin + 1);
+      const body = Math.max(0, Math.min(1, (low - 10) / 90));
+      const transient = Math.max(0, Math.min(1, (low - previousLow - 1) / 12));
+      const peakKick = Math.max(0, Math.min(1, (peak - 70) / 100));
+
+      const shapedBody = Math.pow(body, 0.72);
+      pulse += (shapedBody - pulse) * 0.42;
+      impact = Math.max(impact * 0.78, transient, peakKick * 0.72);
+      previousLow = low;
+
+      document.body.style.setProperty('--lux-pulse', pulse.toFixed(3));
+      document.body.style.setProperty('--lux-impact', impact.toFixed(3));
+      const progressOpen = audio.duration ? Math.min(0.72, (audio.currentTime / audio.duration) * 0.72) : 0;
+      const veilOpen = Math.min(1, 0.17 + progressOpen + impact * 0.22);
+      document.body.style.setProperty('--veil-open', veilOpen.toFixed(3));
+
+      visualFrame = requestAnimationFrame(renderAudioReactive);
+    };
+
+    const startAudioReactive = () => {
+      if (reducedMotion || !analyser) return;
+      cancelAnimationFrame(visualFrame);
+      visualFrame = requestAnimationFrame(renderAudioReactive);
+    };
+
+    const formatTime = seconds => {
+      if (!Number.isFinite(seconds)) return '0:00';
+      const minutes = Math.floor(seconds / 60);
+      const remaining = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${minutes}:${remaining}`;
+    };
+
+    const setPlayingState = playing => {
+      button.classList.toggle('is-playing', playing);
+      player.classList.add('is-active');
+      label.textContent = playing ? 'Hold the vision' : 'Tear the veil';
+      button.setAttribute('aria-label', playing ? 'Pause Nova Visio teaser' : 'Play Nova Visio teaser');
+    };
+
+    button.addEventListener('click', async () => {
+      if (audio.paused) {
+        try {
+          await initAudioReactive();
+          await audio.play();
+          setPlayingState(true);
+          startAudioReactive();
+        } catch (error) {
+          label.textContent = 'Demo unavailable';
+        }
+      } else {
+        audio.pause();
+        setPlayingState(false);
+        startAudioReactive();
+      }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      const percent = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      progressFill.style.width = `${percent}%`;
+      progress.setAttribute('aria-valuenow', Math.round(percent));
+      time.textContent = formatTime(audio.currentTime);
+    });
+
+    audio.addEventListener('ended', () => {
+      setPlayingState(false);
+      audio.currentTime = 0;
+      previousLow = 0;
+      startAudioReactive();
+    });
+
+    const seek = event => {
+      if (!audio.duration) return;
+      const rect = progress.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      audio.currentTime = ratio * audio.duration;
+    };
+
+    progress.addEventListener('click', seek);
+    progress.addEventListener('keydown', event => {
+      if (!audio.duration) return;
+      if (event.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+      if (event.key === 'ArrowLeft') audio.currentTime = Math.max(0, audio.currentTime - 5);
+    });
+  </script>
+
+  <script id="conscientia-chapter-9-tracker">
     try {
       const key = 'conscientia-journey';
       const visited = JSON.parse(localStorage.getItem(key) || '[]');
