@@ -229,10 +229,6 @@
         transform: none !important;
       }
     }
-    .visual-options { display: flex; justify-content: center; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
-    .visual-option { border: 1px solid #ffffff18; color: #aaa; background: transparent; padding: 8px 12px; cursor: pointer; font: inherit; font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; }
-    .visual-option[aria-pressed="true"] { border-color: #b4aaa1; color: #eee; }
-    .visual-option:focus-visible { outline: 2px solid #b4aaa1; outline-offset: 3px; }
   </style>
 </head>
 
@@ -269,11 +265,6 @@
         </div>
       </div>
 
-      <div class="visual-options" role="group" aria-label="Visual style">
-        <button class="visual-option" type="button" data-visual="tear" aria-pressed="true">I · Rupture</button>
-        <button class="visual-option" type="button" data-visual="collapse" aria-pressed="false">II · Collapse</button>
-        <button class="visual-option" type="button" data-visual="distort" aria-pressed="false">III · Distortion</button>
-      </div>
       <a class="back" href="index.html">← Return</a>
     </div>
 
@@ -304,13 +295,6 @@
     let riftSeed = 4127;
     let riftPaths = [];
     let debris = [];
-    let visualStyle = 'tear';
-    document.querySelectorAll('[data-visual]').forEach(option => {
-      option.addEventListener('click', () => {
-        visualStyle = option.dataset.visual;
-        document.querySelectorAll('[data-visual]').forEach(item => item.setAttribute('aria-pressed', String(item === option)));
-      });
-    });
 
     const random = () => {
       riftSeed = (riftSeed * 16807) % 2147483647;
@@ -389,13 +373,16 @@
       const age = Math.max(0, t - 14);
       const onset = 1 - Math.exp(-age * 9);
       const beat = Math.min(1, hit);
-      const shake = dropped ? Math.sin(t * 91) * (dropBurst * 7 + beat * 1.5) : 0;
+      // A brief physical snap at 1s, followed by a smaller tense opening.
+      const introAge = t - 1;
+      const introSnap = (1 - Math.exp(-introAge * 55)) * Math.exp(-introAge * 4.5);
+      const shake = dropped ? Math.sin(t * 91) * (dropBurst * 7 + beat * 1.5) : Math.sin(introAge * 83) * introSnap * 12;
       ctx.save();
       ctx.translate(shake, 0);
 
       // A textured surface with a torn edge, rather than glowing spokes.
-      if (visualStyle === 'tear') {
-        const gap = dropped ? (w * .2 + beat * w * .065) * onset : 1 + energy * 2;
+      {
+        const gap = dropped ? (w * .2 + beat * w * .065) * onset : (1 - Math.exp(-introAge * 8)) * 9 + introSnap * w * .055 + energy * 5;
         const center = w * .48;
         const points = [];
         for (let i = 0; i <= 48; i += 1) {
@@ -437,59 +424,6 @@
         }
       }
 
-      if (visualStyle === 'collapse') {
-        const cols = 9;
-        const rows = 6;
-        const cw = w / cols;
-        const ch = h / rows;
-        for (let row = 0; row < rows; row += 1) {
-          for (let col = 0; col < cols; col += 1) {
-            const n = row * cols + col;
-            const seed = Math.abs(Math.sin(n * 78.23 + 4));
-            const delay = seed * .7;
-            // Falling slabs return as a continuous cascade after the first impact.
-            const fallAge = dropped ? (age < 3.2 ? Math.max(0, age - delay) : (age + seed * 2.4) % 3.2) : 0;
-            const x = col * cw + (dropped ? Math.sin(n * 6.1) * fallAge * 45 : 0);
-            const y = row * ch + fallAge * fallAge * 240;
-            ctx.save();
-            ctx.translate(x + cw / 2,y + ch / 2);
-            ctx.rotate(dropped ? Math.sin(n * 5) * fallAge * .6 : 0);
-            ctx.beginPath();
-            ctx.moveTo(-cw/2,-ch/2);
-            ctx.lineTo(cw/2,-ch/2 + ch * .17 * seed);
-            ctx.lineTo(cw/2 - cw * .1 * seed,ch/2);
-            ctx.lineTo(-cw/2,ch/2 - ch * .16 * seed);
-            ctx.closePath();
-            const shade = 12 + Math.floor(seed * 22 + energy * 12);
-            ctx.fillStyle = `rgb(${shade},${shade-2},${shade-4})`;
-            ctx.shadowColor = '#000';
-            ctx.shadowBlur = dropped ? 15 : 0;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = dropped ? 'rgba(161,147,122,.35)' : 'rgba(90,84,74,.12)';
-            ctx.lineWidth = .8;
-            ctx.stroke();
-            ctx.restore();
-          }
-        }
-      }
-
-      if (visualStyle === 'distort') {
-        const rows = 32;
-        for (let i = 0; i < rows; i += 1) {
-          const y = h * i / rows;
-          const displacement = dropped ? Math.sin(i * 6.3 + t * 3) * (20 + beat * 150 + dropBurst * 100) : Math.sin(t + i) * energy * 2;
-          const shade = 10 + Math.floor((Math.sin(i * .71) + 1) * 8);
-          ctx.fillStyle = `rgb(${shade},${shade-1},${shade-2})`;
-          ctx.fillRect(displacement,y,w,h/rows-1);
-          ctx.fillStyle = `rgba(174,161,139,${dropped ? .04 + beat * .09 : .015})`;
-          ctx.fillRect(w * .47 + displacement,y,w * .04,h/rows-2);
-          if (dropped && Math.sin(i * 3 + t * 8) > .65) {
-            ctx.fillStyle = 'rgba(188,177,155,.14)';
-            ctx.fillRect(displacement,y,w,1);
-          }
-        }
-      }
 
       // Material particles keep moving after the chorus impact.
       if (dropped) {
