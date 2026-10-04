@@ -254,6 +254,102 @@
       outline: none;
     }
 
+    .info-trigger {
+      appearance: none;
+      border: 0;
+      background: none;
+      color: #f2f2f2;
+      font: inherit;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      opacity: 0.6;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    .info-trigger:hover,
+    .info-trigger:focus-visible {
+      opacity: 1;
+      outline: none;
+    }
+
+    .info-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(7px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .info-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .info-panel {
+      position: relative;
+      width: min(680px, 100%);
+      max-height: min(78vh, 720px);
+      overflow-y: auto;
+      padding: clamp(32px, 7vw, 58px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(5, 5, 5, 0.98);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+      text-align: left;
+    }
+
+    .info-panel h2 {
+      margin: 0 0 28px;
+      font-size: clamp(1.35rem, 4vw, 2rem);
+      font-weight: 300;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .info-panel p {
+      margin-top: 18px;
+      color: rgba(242, 242, 242, 0.76);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      line-height: 1.8;
+    }
+
+    .info-panel .info-call {
+      margin-top: 28px;
+      color: #f2f2f2;
+      letter-spacing: 0.08em;
+    }
+
+    .info-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      background: none;
+      color: rgba(242, 242, 242, 0.55);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .info-close:hover,
+    .info-close:focus-visible {
+      color: #f2f2f2;
+      outline: none;
+    }
+
+    body.info-open {
+      overflow: hidden;
+    }
+
     .contact-note {
       margin-top: 18px;
       font-size: 0.65rem;
@@ -399,6 +495,48 @@
           contact@conscientiaband.com
         </a>
 
+        <button
+          class="info-trigger"
+          id="infoButton"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="infoOverlay"
+          aria-expanded="false">
+          Info
+        </button>
+
+      </div>
+
+      <div class="info-overlay" id="infoOverlay" aria-hidden="true">
+        <section
+          class="info-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="infoTitle">
+
+          <button class="info-close" id="infoClose" type="button" aria-label="Close information">
+            &times;
+          </button>
+
+          <h2 id="infoTitle">Conscientia</h2>
+
+          <p>
+            Conscientia&mdash;Latin for consciousness, conscience and awareness&mdash;is a philosophical music project established in 2026.
+          </p>
+
+          <p>
+            It centres on the human mind and on the idea that we can understand ourselves more deeply by letting go of the self-centred and egotistical beliefs that keep the mind anchored. By doing so, we become more aware, more at peace with ourselves and, ultimately, truly conscious.
+          </p>
+
+          <p>
+            This demands commitment: a willingness to relinquish destructive ideals and patterns that may have been preserved, perhaps subconsciously, for years.
+          </p>
+
+          <p class="info-call">
+            Wake up. Join Conscientia.
+          </p>
+
+        </section>
       </div>
 
       <p class="contact-note">
@@ -414,6 +552,40 @@
     const button = document.getElementById("enterButton");
     const audio = document.getElementById("introAudio");
     const status = document.getElementById("status");
+    const infoButton = document.getElementById("infoButton");
+    const infoOverlay = document.getElementById("infoOverlay");
+    const infoClose = document.getElementById("infoClose");
+
+    const openInfo = () => {
+      infoOverlay.classList.add("is-open");
+      infoOverlay.setAttribute("aria-hidden", "false");
+      infoButton.setAttribute("aria-expanded", "true");
+      document.body.classList.add("info-open");
+      infoClose.focus();
+    };
+
+    const closeInfo = () => {
+      infoOverlay.classList.remove("is-open");
+      infoOverlay.setAttribute("aria-hidden", "true");
+      infoButton.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("info-open");
+      infoButton.focus();
+    };
+
+    infoButton.addEventListener("click", openInfo);
+    infoClose.addEventListener("click", closeInfo);
+
+    infoOverlay.addEventListener("click", event => {
+      if (event.target === infoOverlay) {
+        closeInfo();
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && infoOverlay.classList.contains("is-open")) {
+        closeInfo();
+      }
+    });
 
     const sigil = document.getElementById("journeySigil");
     const journeyStatus = document.getElementById("journeyStatus");
