@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Collaborate — Conscientia</title>
+  <meta
+    name="description"
+    content="Conscientia is seeking skilled collaborators in vocals, drums, visual design, mixing, mastering and promotion.">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.035), transparent 38%),
+        #050505;
+      color: #f2f2f2;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .page {
+      width: min(880px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 42px 0 72px;
+    }
+
+    .back {
+      display: inline-block;
+      color: rgba(242, 242, 242, 0.52);
+      text-decoration: none;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+
+    .back:hover,
+    .back:focus-visible {
+      color: #f2f2f2;
+      outline: none;
+    }
+
+    header {
+      padding: clamp(70px, 12vw, 120px) 0 58px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .eyebrow {
+      margin-bottom: 20px;
+      color: rgba(242, 242, 242, 0.38);
+      font-size: 0.67rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 9vw, 6rem);
+      font-weight: 300;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .intro {
+      max-width: 720px;
+      margin-top: 34px;
+      color: rgba(242, 242, 242, 0.7);
+      font-size: clamp(0.95rem, 2vw, 1.08rem);
+      line-height: 1.85;
+    }
+
+    .compensation {
+      margin-top: 24px;
+      padding-left: 18px;
+      border-left: 1px solid rgba(255, 255, 255, 0.35);
+      color: rgba(242, 242, 242, 0.88);
+      line-height: 1.75;
+    }
+
+    .roles {
+      padding-top: 58px;
+    }
+
+    .section-title {
+      margin-bottom: 24px;
+      color: rgba(242, 242, 242, 0.45);
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+    }
+
+    .role-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .role {
+      min-height: 180px;
+      padding: 27px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      background: rgba(255, 255, 255, 0.012);
+    }
+
+    .role:last-child {
+      grid-column: 1 / -1;
+      min-height: auto;
+    }
+
+    .role h2 {
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .role p {
+      margin-top: 16px;
+      color: rgba(242, 242, 242, 0.58);
+      font-size: 0.9rem;
+      line-height: 1.75;
+    }
+
+    .contact {
+      margin-top: 58px;
+      padding: clamp(28px, 6vw, 44px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .contact h2 {
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .contact p {
+      max-width: 680px;
+      margin-top: 18px;
+      color: rgba(242, 242, 242, 0.62);
+      line-height: 1.75;
+    }
+
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 27px;
+    }
+
+    .contact-links a {
+      display: inline-block;
+      padding: 13px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #f2f2f2;
+      text-decoration: none;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .contact-links a:hover,
+    .contact-links a:focus-visible {
+      border-color: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.03);
+      outline: none;
+    }
+
+    @media (max-width: 650px) {
+      .page {
+        width: min(100% - 28px, 880px);
+        padding-top: 28px;
+      }
+
+      header {
+        padding-top: 62px;
+      }
+
+      h1 {
+        letter-spacing: 0.09em;
+      }
+
+      .role-list {
+        grid-template-columns: 1fr;
+      }
+
+      .role:last-child {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <a class="back" href="index.html">&larr; Conscientia</a>
+
+    <header>
+      <p class="eyebrow">Work with the project</p>
+      <h1>Collaborate</h1>
+
+      <p class="intro">
+        Conscientia is seeking skilled, professional and reliable collaborators who can contribute to the project&rsquo;s artistic and technical development.
+      </p>
+
+      <p class="compensation">
+        Compensation is available for suitable collaborations. Scope, terms and rates are negotiable and will be discussed individually.
+      </p>
+    </header>
+
+    <section class="roles" aria-labelledby="rolesTitle">
+      <h2 class="section-title" id="rolesTitle">Currently seeking</h2>
+
+      <div class="role-list">
+        <article class="role">
+          <h2>Vocalist</h2>
+          <p>
+            A versatile vocalist capable of powerful screams and expressive clean vocals, with controlled high-register singing, strong melodic phrasing and a broad emotional range.
+          </p>
+        </article>
+
+        <article class="role">
+          <h2>Drummer</h2>
+          <p>
+            A technically capable drummer who can contribute creatively to the composition, arrangement and development of complex drum parts.
+          </p>
+        </article>
+
+        <article class="role">
+          <h2>Visual Design</h2>
+          <p>
+            Assistance with visual identity, artwork, symbols and digital material that can translate Conscientia&rsquo;s philosophical character into a coherent visual language.
+          </p>
+        </article>
+
+        <article class="role">
+          <h2>Mixing &amp; Mastering</h2>
+          <p>
+            An experienced engineer capable of balancing heavy, progressive and atmospheric elements while preserving clarity, dynamics and impact.
+          </p>
+        </article>
+
+        <article class="role">
+          <h2>Promotion</h2>
+          <p>
+            A promotional collaborator or partner who can contribute to strategy, content, outreach and release campaigns with a professional and long-term approach.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="contact" aria-labelledby="contactTitle">
+      <h2 id="contactTitle">Get in touch</h2>
+      <p>
+        Introduce yourself, describe your relevant experience and include examples of previous work. Serious enquiries are welcome from both individuals and established collaborators.
+      </p>
+
+      <div class="contact-links">
+        <a href="mailto:contact@conscientiaband.com">Email Conscientia</a>
+        <a
+          href="https://www.instagram.com/conscientiaband/"
+          target="_blank"
+          rel="noopener noreferrer">
+          Instagram
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
