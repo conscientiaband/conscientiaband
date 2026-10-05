@@ -358,6 +358,62 @@
       line-height: 1.6;
     }
 
+    .collaborate-card {
+      width: min(520px, 100%);
+      margin: 34px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #f2f2f2;
+      text-decoration: none;
+      text-align: left;
+      transition:
+        border-color 0.3s ease,
+        background 0.3s ease,
+        transform 0.3s ease;
+    }
+
+    .collaborate-card:hover,
+    .collaborate-card:focus-visible {
+      border-color: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.025);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .collaborate-card strong {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
+    .collaborate-card span {
+      display: block;
+      margin-top: 7px;
+      color: rgba(242, 242, 242, 0.42);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      line-height: 1.5;
+    }
+
+    .collaborate-arrow {
+      flex: 0 0 auto;
+      color: rgba(242, 242, 242, 0.45);
+      font-size: 1rem;
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .collaborate-card:hover .collaborate-arrow,
+    .collaborate-card:focus-visible .collaborate-arrow {
+      color: #f2f2f2;
+      transform: translateX(4px);
+    }
+
     #status {
       margin-top: 20px;
       font-size: 0.7rem;
@@ -542,6 +598,14 @@
       <p class="contact-note">
         For any inquiries, feel free to reach out via Instagram for a faster response.
       </p>
+
+      <a class="collaborate-card" href="collaborate.html">
+        <span>
+          <strong>Collaborate</strong>
+          <span>Open roles and creative partnerships</span>
+        </span>
+        <span class="collaborate-arrow" aria-hidden="true">&rarr;</span>
+      </a>
 
       <p id="status"></p>
 
